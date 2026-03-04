@@ -21,8 +21,22 @@ let
     overlays = [ karakuriOverlay ];
   };
 
+  # Merge theme + wallpaper defaults with user settings (user's explicit options win)
+  themeDefaults = {
+    options = {
+      border_color = cfg.theme.borderColor;
+      dim_inactive_color = cfg.theme.dimColor;
+    };
+  };
+  wallpaperDefaults = lib.optionalAttrs (cfg.wallpaper.path != null) {
+    options.wallpaper = cfg.wallpaper.path;
+  };
+  mergedSettings = lib.recursiveUpdate
+    (lib.recursiveUpdate wallpaperDefaults themeDefaults)
+    (if cfg.settings != null then cfg.settings else {});
+
   # Generate YAML config from nix attrs
-  yamlConfig = pkgs.writeText "karakuri.yaml" (lib.generators.toYAML { } cfg.settings);
+  yamlConfig = pkgs.writeText "karakuri.yaml" (lib.generators.toYAML { } mergedSettings);
 
   logDir =
     if isDarwin then
@@ -90,6 +104,28 @@ in
           script_dirs = [ "~/.config/karakuri/scripts" ];
           hot_reload = true;
         };
+      };
+    };
+
+    wallpaper = {
+      path = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+        description = "Desktop wallpaper image path (applied on karakuri startup).";
+        example = "~/Pictures/wallpaper.png";
+      };
+    };
+
+    theme = {
+      borderColor = mkOption {
+        type = types.str;
+        default = "#88C0D0";
+        description = "Active window border color (hex).";
+      };
+      dimColor = mkOption {
+        type = types.str;
+        default = "#2E3440";
+        description = "Inactive window dim overlay color (hex).";
       };
     };
 
@@ -167,6 +203,14 @@ in
       xdg.configFile = mapAttrs' (
         name: content: nameValuePair "karakuri/scripts/${name}.rhai" { text = content; }
       ) cfg.scripting.extraScripts;
+    })
+
+    # Auto-source theme colors from Stylix when available
+    (mkIf (config.lib ? stylix && config.stylix.enable) {
+      blackmatter.components.karakuri.theme = {
+        borderColor = mkDefault "#${config.lib.stylix.colors.base0C}";
+        dimColor = mkDefault "#${config.lib.stylix.colors.base00}";
+      };
     })
   ]);
 }
