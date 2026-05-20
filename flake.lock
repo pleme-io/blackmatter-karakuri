@@ -12,11 +12,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1779243770,
-        "narHash": "sha256-w38RQ0xXh+WDrawjNRfnyJe9i9oQascoYAN15iIHces=",
+        "lastModified": 1779313012,
+        "narHash": "sha256-yZUuWFUKiNDjxR4Am2Kc+/4+Xyhie5C9cURBNpKP34g=",
         "owner": "pleme-io",
         "repo": "ayatsuri",
-        "rev": "9c7bfe2bd1b4ae3565b843384deb2ff95eabbff8",
+        "rev": "bf213d47c379bfe163c91e88e4b968461b5407b5",
         "type": "github"
       },
       "original": {
